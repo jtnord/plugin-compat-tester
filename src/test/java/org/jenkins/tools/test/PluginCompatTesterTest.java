@@ -67,7 +67,7 @@ class PluginCompatTesterTest {
         tester.testPlugins();
         Path report =
                 tempDir.toPath()
-                        .resolve("text-finder")
+                        .resolve("text-finder-plugin")
                         .resolve("target")
                         .resolve("surefire-reports")
                         .resolve("TEST-InjectedTest.xml");
@@ -227,5 +227,33 @@ class PluginCompatTesterTest {
         Matcher m = Pattern.compile(PluginCompatTester.JENKINS_CORE_FILE_REGEX).matcher(fileName);
         assertThat("No matches", m.matches(), is(true));
         assertThat("Invalid group", m.group(1), is("2.329-rc31964.3b_29e9d46_038_"));
+    }
+
+    @Test
+    void testDirectoryFromGitUrl() throws Exception {
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "ssh://git@github.com/jenkinsci/plugin-compat-tester.git"));
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "https://github.com/jenkinsci/plugin-compat-tester.git"));
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "git@host.xz:jenkinsci/plugin-compat-tester.git"));
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "ssh://git@github.com/jenkinsci/plugin-compat-tester"));
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "https://github.com/jenkinsci/plugin-compat-tester"));
+        assertEquals(
+                "plugin-compat-tester",
+                PluginCompatTester.getRepoNameFromGitURL(
+                        "git@host.xz:jenkinsci/plugin-compat-tester"));
     }
 }

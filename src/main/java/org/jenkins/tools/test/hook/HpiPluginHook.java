@@ -35,16 +35,15 @@ public class HpiPluginHook extends PluginCompatTesterHookBeforeExecution {
                         config.getExternalMaven(),
                         config.getMavenSettings(),
                         config.getMavenArgs());
-        File pluginDir = context.getPluginDir();
-        if (pluginDir != null) {
-            try {
-                String version = getHpiPluginVersion(pluginDir, runner);
-                return new VersionNumber(version).isOlderThan(new VersionNumber("3.37"));
-            } catch (PomExecutionException e) {
-                return false;
-            }
+        File cloneDir = context.getCloneDirectory();
+        try {
+            String version =
+                    getHpiPluginVersion(
+                            cloneDir, context.getPluginMetadata().getModulePath(), runner);
+            return new VersionNumber(version).isOlderThan(new VersionNumber("3.37"));
+        } catch (PomExecutionException e) {
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -52,12 +51,14 @@ public class HpiPluginHook extends PluginCompatTesterHookBeforeExecution {
         context.getArgs().add("-Dhpi-plugin.version=3.37");
     }
 
-    private static String getHpiPluginVersion(File pluginPath, MavenRunner runner)
+    private static String getHpiPluginVersion(
+            File cloneDirectory, String moduleName, MavenRunner runner)
             throws PomExecutionException {
-        File log = new File(pluginPath, "hpi-plugin.log");
+        File log = new File(cloneDirectory, "hpi-plugin.log");
         runner.run(
                 Map.of("expression", "hpi-plugin.version", "output", log.getAbsolutePath()),
-                pluginPath,
+                cloneDirectory,
+                moduleName,
                 null,
                 "-q",
                 "help:evaluate");
